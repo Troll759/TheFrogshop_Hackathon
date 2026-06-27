@@ -6,282 +6,318 @@
 
 body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f5f7fa;
-    color: #1a1a2e;
+    background: #0d1b2a;
+    color: #e0e0e0;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    line-height: 1.6;
+    overflow-x: hidden;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 20px;
+/* Language bar */
+.lang-bar {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+}
+
+.lang-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.lang-btn:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+}
+
+.lang-btn.active {
+    background: #dd1c1a;
+    border-color: #dd1c1a;
+    color: white;
+}
+
+/* Hero section */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.hero.hidden {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: scale(0.96);
+}
+
+.hero-content {
+    text-align: center;
+    width: 100%;
+    max-width: 680px;
+}
+
+.hero-content h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+}
+
+.hero-content > p {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 40px;
+}
+
+/* Search box */
+.search-wrapper {
+    position: relative;
     width: 100%;
 }
 
-/* Header */
-header {
-    background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 100%);
-    color: white;
-    padding: 32px 0;
-    text-align: center;
-}
-
-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-header .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.85;
-}
-
-/* Progress */
-.progress-wrapper {
-    margin: 32px 0 24px;
-}
-
-.progress-steps {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.progress-step {
-    width: 36px;
-    height: 6px;
-    border-radius: 3px;
-    background: #ddd;
-    transition: background 0.3s;
-}
-
-.progress-step.active {
-    background: #dd1c1a;
-}
-
-.progress-step.completed {
-    background: #2d8a3e;
-}
-
-/* Wizard */
-.wizard {
-    background: white;
-    border-radius: 16px;
-    padding: 40px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    margin-bottom: 32px;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.wizard h2 {
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-    color: #0d1b2a;
-}
-
-.wizard .question-desc {
-    color: #555;
-    margin-bottom: 24px;
-    font-size: 0.95rem;
-}
-
-/* Options */
-.options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.option-btn {
+.search-box {
     display: flex;
     align-items: center;
-    gap: 12px;
+    background: #1b2838;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
     padding: 16px 20px;
-    border: 2px solid #e8e8e8;
-    border-radius: 12px;
-    background: white;
-    cursor: pointer;
-    font-size: 1rem;
-    text-align: left;
-    transition: all 0.2s;
-    color: #1a1a2e;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.option-btn:hover {
+.search-box:focus-within {
     border-color: #dd1c1a;
-    background: #fff5f5;
-    transform: translateX(4px);
+    box-shadow: 0 0 0 4px rgba(221,28,26,0.15), 0 8px 32px rgba(0,0,0,0.3);
 }
 
-.option-btn .option-icon {
+.search-icon {
+    font-size: 1.3rem;
+    margin-right: 12px;
+    opacity: 0.6;
+}
+
+.search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 1.1rem;
+    font-family: inherit;
+}
+
+.search-box input::placeholder {
+    color: rgba(255,255,255,0.35);
+}
+
+.clear-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.clear-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.clear-btn.hidden { display: none; }
+
+/* Suggestions dropdown */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #1b2838;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    z-index: 50;
+    display: none;
+}
+
+.suggestions.visible { display: block; }
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+
+.suggestion-item:hover, .suggestion-item.active {
+    background: rgba(221,28,26,0.1);
+}
+
+.suggestion-item .s-icon {
     font-size: 1.4rem;
     flex-shrink: 0;
 }
 
-.option-btn .option-text {
+.suggestion-item .s-text {
     flex: 1;
+    text-align: left;
 }
 
-.option-btn .option-text strong {
-    display: block;
-    margin-bottom: 2px;
+.suggestion-item .s-title {
+    font-weight: 600;
+    color: white;
+    font-size: 0.95rem;
 }
 
-.option-btn .option-text small {
-    color: #777;
-    font-size: 0.85rem;
+.suggestion-item .s-desc {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
 }
 
-/* Navigation */
-.nav-buttons {
+.suggestion-item .s-arrow {
+    color: rgba(255,255,255,0.3);
+    font-size: 1.1rem;
+}
+
+/* Quick tags */
+.quick-tags {
     display: flex;
-    justify-content: space-between;
-    margin-top: 32px;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 24px;
 }
 
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
+.quick-tag {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.84rem;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.15s;
 }
 
-.btn-back {
-    background: #f0f0f0;
-    color: #333;
-}
-
-.btn-back:hover {
-    background: #e0e0e0;
-}
-
-.btn-primary {
-    background: #dd1c1a;
+.quick-tag:hover {
+    background: rgba(221,28,26,0.15);
+    border-color: #dd1c1a;
     color: white;
 }
 
-.btn-primary:hover {
-    background: #b71615;
+/* Result panel */
+.result-panel {
+    min-height: 100vh;
+    padding: 80px 20px 60px;
+    max-width: 720px;
+    margin: 0 auto;
+    animation: fadeUp 0.3s ease;
 }
 
-.btn-restart {
-    background: #0d1b2a;
-    color: white;
+.result-panel.hidden { display: none; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-restart:hover {
-    background: #1b2838;
-}
-
-/* Results */
-.results {
-    margin-bottom: 48px;
-    animation: fadeIn 0.3s ease;
-}
-
-.results.hidden {
-    display: none;
-}
-
-.results-header {
-    background: white;
-    border-radius: 16px;
-    padding: 32px 40px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: #dd1c1a;
+    font-size: 0.95rem;
+    cursor: pointer;
     margin-bottom: 24px;
-    text-align: center;
+    padding: 8px 0;
+    font-weight: 500;
+    transition: opacity 0.15s;
 }
 
-.results-header h2 {
+.back-btn:hover { opacity: 0.8; }
+
+/* Result cards */
+.result-header {
+    margin-bottom: 32px;
+}
+
+.result-header h2 {
     font-size: 1.6rem;
-    color: #0d1b2a;
+    color: white;
     margin-bottom: 8px;
 }
 
-.results-header p {
-    color: #555;
-}
-
-.timeline {
-    position: relative;
-    padding-left: 32px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 14px;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: #e0e0e0;
-    border-radius: 2px;
+.result-header p {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.95rem;
 }
 
 .step-card {
-    position: relative;
-    background: white;
-    border-radius: 12px;
-    padding: 24px 28px;
+    background: #1b2838;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 24px;
     margin-bottom: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.step-card::before {
-    content: '';
-    position: absolute;
-    left: -25px;
-    top: 28px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #dd1c1a;
-    border: 3px solid white;
-    box-shadow: 0 0 0 2px #dd1c1a;
-}
-
-.step-card .step-number {
+.step-card .step-badge {
     display: inline-block;
-    background: #ffeaea;
+    background: rgba(221,28,26,0.15);
     color: #dd1c1a;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     padding: 3px 10px;
-    border-radius: 12px;
-    margin-bottom: 8px;
+    border-radius: 8px;
     text-transform: uppercase;
+    margin-bottom: 10px;
 }
 
 .step-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-    color: #0d1b2a;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 4px;
 }
 
-.step-card .step-timing {
-    font-size: 0.85rem;
+.step-card .timing {
+    font-size: 0.82rem;
     color: #dd1c1a;
     font-weight: 500;
     margin-bottom: 12px;
 }
 
 .step-card p {
-    color: #444;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
     margin-bottom: 12px;
+    line-height: 1.5;
 }
 
 .step-card ul {
@@ -290,73 +326,65 @@ header .subtitle {
 }
 
 .step-card ul li {
-    padding: 6px 0 6px 24px;
+    padding: 5px 0 5px 22px;
     position: relative;
-    color: #333;
-    font-size: 0.95rem;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.88rem;
 }
 
 .step-card ul li::before {
     content: '📄';
     position: absolute;
     left: 0;
+    font-size: 0.78rem;
 }
 
 .step-card .tip {
-    background: #f0f9ff;
+    background: rgba(14,165,233,0.1);
     border-left: 3px solid #0ea5e9;
     padding: 10px 14px;
     border-radius: 0 8px 8px 0;
     margin-top: 12px;
-    font-size: 0.9rem;
-    color: #0369a1;
+    font-size: 0.84rem;
+    color: #7dd3fc;
 }
 
 .step-card .warning {
-    background: #fffbeb;
+    background: rgba(245,158,11,0.1);
     border-left: 3px solid #f59e0b;
     padding: 10px 14px;
     border-radius: 0 8px 8px 0;
     margin-top: 12px;
-    font-size: 0.9rem;
-    color: #92400e;
+    font-size: 0.84rem;
+    color: #fcd34d;
 }
 
-/* Footer */
-footer {
-    margin-top: auto;
-    background: #0d1b2a;
-    color: #aaa;
-    padding: 24px 0;
-    font-size: 0.85rem;
+.disclaimer {
+    margin-top: 32px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.4);
     text-align: center;
 }
 
-footer a {
-    color: #dd1c1a;
-}
+.disclaimer a { color: #dd1c1a; }
 
-footer .sources {
-    margin-top: 8px;
-    font-size: 0.8rem;
-    opacity: 0.7;
+/* RTL */
+[dir="rtl"] .search-icon { margin-right: 0; margin-left: 12px; }
+[dir="rtl"] .suggestion-item .s-text { text-align: right; }
+[dir="rtl"] .step-card ul li { padding: 5px 22px 5px 0; }
+[dir="rtl"] .step-card ul li::before { left: auto; right: 0; }
+[dir="rtl"] .step-card .tip, [dir="rtl"] .step-card .warning {
+    border-left: none;
+    border-right: 3px solid;
 }
+[dir="rtl"] .step-card .tip { border-right-color: #0ea5e9; }
+[dir="rtl"] .step-card .warning { border-right-color: #f59e0b; }
+[dir="rtl"] .lang-bar { right: auto; left: 20px; }
 
-/* Responsive */
+/* Mobile */
 @media (max-width: 600px) {
-    header h1 {
-        font-size: 1.5rem;
-    }
-
-    .wizard {
-        padding: 24px 20px;
-    }
-
-    .step-card {
-        padding: 20px;
-    }
-
-    .option-btn {
-        padding: 14px 16px;
-    }
+    .hero-content h1 { font-size: 1.6rem; }
+    .search-box { padding: 14px 16px; }
+    .search-box input { font-size: 1rem; }
+    .result-panel { padding: 70px 16px 40px; }
 }

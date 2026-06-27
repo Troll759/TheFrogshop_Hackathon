@@ -3,39 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Germany Immigration Guide — Document Wizard</title>
+    <title>Germany Immigration Guide</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <h1>🇩🇪 Germany Immigration Guide</h1>
-                <p class="subtitle">Find out exactly which documents you need, step by step</p>
+    <div class="lang-bar">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+        <button class="lang-btn" data-lang="uk">UA</button>
+        <button class="lang-btn" data-lang="ar">AR</button>
+    </div>
+
+    <main class="hero">
+        <div class="hero-content">
+            <h1 id="hero-title">🇩🇪 What do you need help with?</h1>
+            <p id="hero-subtitle">Type your situation and we'll show you exactly which documents you need</p>
+
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" autocomplete="off" spellcheck="false">
+                    <button class="clear-btn hidden" id="clear-btn">✕</button>
+                </div>
+                <div class="suggestions" id="suggestions"></div>
             </div>
+
+            <div class="quick-tags" id="quick-tags"></div>
         </div>
-    </header>
-
-    <main class="container">
-        <!-- Progress bar -->
-        <div class="progress-wrapper" id="progress-wrapper">
-            <div class="progress-steps" id="progress-steps"></div>
-        </div>
-
-        <!-- Wizard content area -->
-        <div id="wizard" class="wizard"></div>
-
-        <!-- Results area -->
-        <div id="results" class="results hidden"></div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>⚠️ This guide provides general information only and does not constitute legal advice. Always verify with official sources like <a href="https://www.bamf.de" target="_blank">BAMF</a> or your local Ausländerbehörde.</p>
-            <p class="sources">Sources: German Federal Office for Migration and Refugees, Make-it-in-Germany.com, Handbook Germany</p>
-        </div>
-    </footer>
+    <div class="result-panel hidden" id="result-panel">
+        <button class="back-btn" id="back-btn">← <span id="back-text">Back to search</span></button>
+        <div class="result-content" id="result-content"></div>
+        <p class="disclaimer" id="disclaimer-text"></p>
+    </div>
 
+    <script src="search-data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
