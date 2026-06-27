@@ -1,235 +1,239 @@
 // ============ STATE ============
-let answers = {};
-let currentStepId = 'start';
 let currentLang = 'en';
+let activeIndex = -1;
+let filteredTopics = [];
 
-const chatMessages = document.getElementById('chat-messages');
-const inputArea = document.getElementById('input-area');
+// ============ DOM REFS ============
+const searchInput = document.getElementById('search-input');
+const suggestionsEl = document.getElementById('suggestions');
+const clearBtn = document.getElementById('clear-btn');
+const heroEl = document.querySelector('.hero');
+const resultPanel = document.getElementById('result-panel');
+const resultContent = document.getElementById('result-content');
+const quickTagsEl = document.getElementById('quick-tags');
+const backBtn = document.getElementById('back-btn');
 
-// ============ LANGUAGE SWITCHING ============
+// ============ LANGUAGE ============
 
-function t() { return TRANSLATIONS[currentLang]; }
+function ui() { return UI[currentLang]; }
 
-function initLangSwitcher() {
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang = btn.dataset.lang;
-            if (lang === currentLang) return;
-            currentLang = lang;
+function setLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
-            // Update active button
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    // Update UI text
+    document.getElementById('hero-title').textContent = ui().title;
+    document.getElementById('hero-subtitle').textContent = ui().subtitle;
+    searchInput.placeholder = ui().placeholder;
+    document.getElementById('back-text').textContent = ui().back;
+    document.getElementById('disclaimer-text').innerHTML = ui().disclaimer;
 
-            // Update header
-            document.getElementById('header-title').textContent = t().headerTitle;
-            document.getElementById('header-subtitle').textContent = t().headerSubtitle;
+    // Update active lang button
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
 
-            // Set RTL for Arabic
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    // Rebuild quick tags
+    renderQuickTags();
 
-            // Restart conversation in new language
-            restart();
-        });
-    });
+    // Clear search state
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    suggestionsEl.classList.remove('visible');
+    showHero();
 }
 
-// ============ MESSAGE HELPERS ============
+// ============ SEARCH LOGIC ============
 
-function scrollToBottom() {
-    setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 50);
-}
-
-function addBotMessage(text) {
-    return new Promise(resolve => {
-        const typingEl = document.createElement('div');
-        typingEl.className = 'typing-indicator';
-        typingEl.innerHTML = '<span></span><span></span><span></span>';
-        chatMessages.appendChild(typingEl);
-        scrollToBottom();
-
-        const delay = Math.min(400 + text.length * 5, 1000);
-        setTimeout(() => {
-            chatMessages.removeChild(typingEl);
-            const msg = document.createElement('div');
-            msg.className = 'message bot';
-            msg.innerHTML = `
-                <div class="msg-avatar">🇩🇪</div>
-                <div class="bubble">${text}</div>
-            `;
-            chatMessages.appendChild(msg);
-            scrollToBottom();
-            resolve();
-        }, delay);
-    });
-}
-
-function addUserMessage(text) {
-    const msg = document.createElement('div');
-    msg.className = 'message user';
-    msg.innerHTML = `
-        <div class="msg-avatar">👤</div>
-        <div class="bubble">${text}</div>
-    `;
-    chatMessages.appendChild(msg);
-    scrollToBottom();
-}
-
-function showOptions(options, moreOptions) {
-    const group = document.createElement('div');
-    group.className = 'options-group';
-    const trans = t();
-
-    options.forEach(opt => {
-        const label = trans.options[opt.optKey] || { label: opt.optKey, sub: '' };
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerHTML = `
-            <span class="opt-icon">${opt.icon}</span>
-            <span class="opt-label">${label.label}${label.sub ? `<span class="opt-sub">${label.sub}</span>` : ''}</span>
-        `;
-        btn.addEventListener('click', () => selectOption(opt, label.label, group));
-        group.appendChild(btn);
-    });
-
-    if (moreOptions && moreOptions.length > 0) {
-        const moreBtn = document.createElement('button');
-        moreBtn.className = 'show-more-btn';
-        moreBtn.innerHTML = `<span>👁️</span> ${trans.showMore} (${moreOptions.length} ${trans.more})`;
-        moreBtn.addEventListener('click', () => {
-            moreBtn.remove();
-            moreOptions.forEach(opt => {
-                const label = trans.options[opt.optKey] || { label: opt.optKey, sub: '' };
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerHTML = `
-                    <span class="opt-icon">${opt.icon}</span>
-                    <span class="opt-label">${label.label}${label.sub ? `<span class="opt-sub">${label.sub}</span>` : ''}</span>
-                `;
-                btn.addEventListener('click', () => selectOption(opt, label.label, group));
-                group.appendChild(btn);
-            });
-            scrollToBottom();
-        });
-        group.appendChild(moreBtn);
+function search(query) {
+    if (!query.trim()) {
+        suggestionsEl.classList.remove('visible');
+        filteredTopics = [];
+        activeIndex = -1;
+        return;
     }
 
-    chatMessages.appendChild(group);
-    scrollToBottom();
-}
+    const q = query.toLowerCase().trim();
+    const words = q.split(/\s+/);
 
-// ============ FLOW CONTROL ============
+    // Score each topic
+    const scored = TOPICS.map(topic => {
+        const keywords = topic.keywords[currentLang] || topic.keywords.en;
+        let score = 0;
 
-async function selectOption(option, displayLabel, optionsGroup) {
-    if (optionsGroup) optionsGroup.remove();
-    addUserMessage(`${option.icon} ${displayLabel}`);
-
-    // Store answer
-    answers[currentStepId === 'start' ? 'origin' : currentStepId] = option.id;
-    await advanceFlow();
-}
-
-async function advanceFlow() {
-    const step = FLOW_STRUCTURE[currentStepId];
-    let nextId = step.next;
-
-    // Check skip rules
-    if (nextId && nextId !== 'results' && FLOW_STRUCTURE[nextId].skipIf) {
-        const skipRules = FLOW_STRUCTURE[nextId].skipIf;
-        for (const [key, values] of Object.entries(skipRules)) {
-            if (values.includes(answers[key])) {
-                if (nextId === 'qualification') answers.qualification = 'none';
-                if (nextId === 'purpose') answers.purpose = 'asylum';
-                nextId = FLOW_STRUCTURE[nextId].next;
-                break;
+        for (const word of words) {
+            for (const kw of keywords) {
+                if (kw.toLowerCase().includes(word)) {
+                    score += word.length / kw.length; // partial match scoring
+                    if (kw.toLowerCase().startsWith(word)) score += 0.5; // prefix bonus
+                    if (kw.toLowerCase() === word) score += 1; // exact bonus
+                }
             }
+            // Also match topic display name
+            const name = (TOPIC_NAMES[currentLang] || TOPIC_NAMES.en)[topic.id];
+            if (name && name.title.toLowerCase().includes(word)) score += 0.8;
         }
+
+        return { topic, score };
+    });
+
+    // Filter and sort
+    filteredTopics = scored
+        .filter(s => s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(s => s.topic);
+
+    activeIndex = -1;
+    renderSuggestions();
+}
+
+function renderSuggestions() {
+    if (filteredTopics.length === 0) {
+        suggestionsEl.innerHTML = `<div class="suggestion-item"><span class="s-text"><span class="s-title" style="opacity:0.5">${ui().noResults}</span></span></div>`;
+        suggestionsEl.classList.add('visible');
+        return;
     }
 
-    currentStepId = nextId;
+    suggestionsEl.innerHTML = filteredTopics.map((topic, i) => {
+        const name = (TOPIC_NAMES[currentLang] || TOPIC_NAMES.en)[topic.id];
+        return `
+            <div class="suggestion-item${i === activeIndex ? ' active' : ''}" data-index="${i}">
+                <span class="s-icon">${topic.icon}</span>
+                <span class="s-text">
+                    <span class="s-title">${name.title}</span>
+                    <span class="s-desc">${name.desc}</span>
+                </span>
+                <span class="s-arrow">→</span>
+            </div>`;
+    }).join('');
 
-    if (currentStepId === 'results') {
-        await showResults();
-    } else {
-        await showStep(currentStepId);
+    suggestionsEl.classList.add('visible');
+
+    // Add click handlers
+    suggestionsEl.querySelectorAll('.suggestion-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const idx = parseInt(el.dataset.index);
+            selectTopic(filteredTopics[idx]);
+        });
+    });
+}
+
+// ============ TOPIC DISPLAY ============
+
+function selectTopic(topic) {
+    suggestionsEl.classList.remove('visible');
+    searchInput.blur();
+
+    const name = (TOPIC_NAMES[currentLang] || TOPIC_NAMES.en)[topic.id];
+    const steps = getTopicSteps(topic.id, currentLang);
+
+    let html = `<div class="result-header"><h2>${topic.icon} ${name.title}</h2><p>${name.desc}</p></div>`;
+
+    steps.forEach(step => {
+        html += `
+            <div class="step-card">
+                <span class="step-badge">${step.badge}</span>
+                <h3>${step.title}</h3>
+                <div class="timing">⏰ ${step.timing}</div>
+                <p>${step.desc}</p>
+                <ul>${step.docs.map(d => `<li>${d}</li>`).join('')}</ul>
+                ${step.tip ? `<div class="tip">💡 ${step.tip}</div>` : ''}
+                ${step.warning ? `<div class="warning">⚠️ ${step.warning}</div>` : ''}
+            </div>`;
+    });
+
+    resultContent.innerHTML = html;
+    heroEl.classList.add('hidden');
+    resultPanel.classList.remove('hidden');
+    window.scrollTo({ top: 0 });
+}
+
+function showHero() {
+    resultPanel.classList.add('hidden');
+    heroEl.classList.remove('hidden');
+}
+
+// ============ QUICK TAGS ============
+
+function renderQuickTags() {
+    quickTagsEl.innerHTML = ui().quickTags
+        .map(tag => `<button class="quick-tag">${tag}</button>`)
+        .join('');
+
+    quickTagsEl.querySelectorAll('.quick-tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+            searchInput.value = btn.textContent;
+            searchInput.focus();
+            clearBtn.classList.remove('hidden');
+            search(btn.textContent);
+        });
+    });
+}
+
+// ============ EVENT LISTENERS ============
+
+// Search input
+searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    clearBtn.classList.toggle('hidden', !val);
+    search(val);
+});
+
+// Clear button
+clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    suggestionsEl.classList.remove('visible');
+    searchInput.focus();
+});
+
+// Keyboard navigation
+searchInput.addEventListener('keydown', (e) => {
+    if (!suggestionsEl.classList.contains('visible')) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, filteredTopics.length - 1);
+        renderSuggestions();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, -1);
+        renderSuggestions();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && filteredTopics[activeIndex]) {
+            selectTopic(filteredTopics[activeIndex]);
+        } else if (filteredTopics.length > 0) {
+            selectTopic(filteredTopics[0]);
+        }
+    } else if (e.key === 'Escape') {
+        suggestionsEl.classList.remove('visible');
+        searchInput.blur();
     }
-}
+});
 
-async function showStep(stepId) {
-    const structure = FLOW_STRUCTURE[stepId];
-    const flowText = t().flow[stepId];
-
-    await addBotMessage(flowText.message);
-    if (flowText.followUp) {
-        await addBotMessage(flowText.followUp);
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+        suggestionsEl.classList.remove('visible');
     }
+});
 
-    showOptions(structure.options, structure.moreOptions);
-}
+// Focus shows suggestions if there's text
+searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim()) search(searchInput.value);
+});
 
-// ============ RESULTS ============
+// Back button
+backBtn.addEventListener('click', () => {
+    showHero();
+    searchInput.focus();
+});
 
-async function showResults() {
-    const trans = t();
-    await addBotMessage(trans.resultsIntro);
-
-    const steps = generateResults(answers, currentLang);
-
-    for (let i = 0; i < steps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 250));
-        addResultCard(steps[i]);
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-    await addBotMessage(trans.resultsOutro);
-
-    inputArea.innerHTML = `
-        <button class="restart-btn" onclick="restart()">${trans.restart}</button>
-        <p class="disclaimer">${trans.disclaimer}</p>
-    `;
-}
-
-function addResultCard(step) {
-    const card = document.createElement('div');
-    card.className = 'message bot';
-    card.style.maxWidth = '92%';
-
-    let html = `
-        <div class="result-card">
-            <span class="step-badge">${step.number}</span>
-            <h4>${step.title}</h4>
-            <div class="timing">⏰ ${step.timing}</div>
-            <p>${step.description}</p>
-            <ul>${step.documents.map(d => `<li>${d}</li>`).join('')}</ul>
-            ${step.tip ? `<div class="tip">💡 ${step.tip}</div>` : ''}
-            ${step.warning ? `<div class="warning">⚠️ ${step.warning}</div>` : ''}
-        </div>
-    `;
-
-    card.innerHTML = html;
-    chatMessages.appendChild(card);
-    scrollToBottom();
-}
-
-// ============ RESTART ============
-
-function restart() {
-    answers = {};
-    currentStepId = 'start';
-    chatMessages.innerHTML = '';
-    inputArea.innerHTML = '';
-    init();
-}
+// Language buttons
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+});
 
 // ============ INIT ============
-
-async function init() {
-    initLangSwitcher();
-    document.getElementById('header-title').textContent = t().headerTitle;
-    document.getElementById('header-subtitle').textContent = t().headerSubtitle;
-    await showStep('start');
-}
-
-init();
+setLanguage('en');
+searchInput.focus();
