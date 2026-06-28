@@ -1,0 +1,20 @@
+// Common countries of origin for migrants in Germany (English names).
+export const COUNTRIES = [
+  "Afghanistan","Albania","Algeria","Argentina","Armenia","Australia","Austria","Azerbaijan",
+  "Bangladesh","Belarus","Belgium","Bolivia","Bosnia and Herzegovina","Brazil","Bulgaria",
+  "Cameroon","Canada","Chile","China","Colombia","Croatia","Cuba","Cyprus","Czech Republic",
+  "Denmark","Dominican Republic","Ecuador","Egypt","Eritrea","Estonia","Ethiopia",
+  "Finland","France","Georgia","Ghana","Greece","Guatemala","Honduras","Hungary",
+  "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Ivory Coast",
+  "Japan","Jordan","Kazakhstan","Kenya","Kosovo","Kuwait","Kyrgyzstan",
+  "Latvia","Lebanon","Libya","Lithuania","Luxembourg",
+  "Malaysia","Mali","Malta","Mexico","Moldova","Mongolia","Montenegro","Morocco","Myanmar",
+  "Nepal","Netherlands","New Zealand","Nicaragua","Nigeria","North Macedonia","Norway",
+  "Pakistan","Palestine","Peru","Philippines","Poland","Portugal",
+  "Qatar","Romania","Russia","Rwanda",
+  "Saudi Arabia","Senegal","Serbia","Singapore","Slovakia","Slovenia","Somalia",
+  "South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Syria",
+  "Taiwan","Tajikistan","Tanzania","Thailand","Tunisia","Turkey","Turkmenistan",
+  "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+  "Venezuela","Vietnam","Yemen","Zimbabwe",
+];
